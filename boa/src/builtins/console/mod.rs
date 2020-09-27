@@ -17,7 +17,8 @@
 mod tests;
 
 use crate::{
-    builtins::function::make_builtin_fn,
+    builtins::{BuiltIn, ObjectBuilder},
+    property::Attribute,
     value::{display_obj, RcString, Value},
     BoaProfiler, Context, Result,
 };
@@ -134,6 +135,37 @@ pub(crate) struct Console {
     count_map: FxHashMap<RcString, u32>,
     timer_map: FxHashMap<RcString, u128>,
     groups: Vec<String>,
+}
+
+impl BuiltIn for Console {
+    const NAME: &'static str = "console";
+
+    fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
+        let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
+        let console = ObjectBuilder::new(context)
+            .static_method(Self::assert, "assert", 0)
+            .static_method(Self::clear, "clear", 0)
+            .static_method(Self::debug, "debug", 0)
+            .static_method(Self::error, "error", 0)
+            .static_method(Self::info, "info", 0)
+            .static_method(Self::log, "log", 0)
+            .static_method(Self::trace, "trace", 0)
+            .static_method(Self::warn, "warn", 0)
+            .static_method(Self::error, "exception", 0)
+            .static_method(Self::count, "count", 0)
+            .static_method(Self::count_reset, "countReset", 0)
+            .static_method(Self::group, "group", 0)
+            .static_method(Self::group, "groupCollapsed", 0)
+            .static_method(Self::group_end, "groupEnd", 0)
+            .static_method(Self::time, "time", 0)
+            .static_method(Self::time_log, "timeLog", 0)
+            .static_method(Self::time_end, "timeEnd", 0)
+            .static_method(Self::dir, "dir", 0)
+            .static_method(Self::dir, "dirxml", 0)
+            .build();
+
+        (Self::NAME, console, Self::attribute())
+    }
 }
 
 impl Console {
@@ -494,36 +526,5 @@ impl Console {
         );
 
         Ok(Value::undefined())
-    }
-
-    /// Initialise the `console` object on the global object.
-    #[inline]
-    pub(crate) fn init(interpreter: &mut Context) -> (&'static str, Value) {
-        let global = interpreter.global_object();
-        let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
-
-        let console = Value::new_object(Some(global));
-
-        make_builtin_fn(Self::assert, "assert", &console, 0, interpreter);
-        make_builtin_fn(Self::clear, "clear", &console, 0, interpreter);
-        make_builtin_fn(Self::debug, "debug", &console, 0, interpreter);
-        make_builtin_fn(Self::error, "error", &console, 0, interpreter);
-        make_builtin_fn(Self::info, "info", &console, 0, interpreter);
-        make_builtin_fn(Self::log, "log", &console, 0, interpreter);
-        make_builtin_fn(Self::trace, "trace", &console, 0, interpreter);
-        make_builtin_fn(Self::warn, "warn", &console, 0, interpreter);
-        make_builtin_fn(Self::error, "exception", &console, 0, interpreter);
-        make_builtin_fn(Self::count, "count", &console, 0, interpreter);
-        make_builtin_fn(Self::count_reset, "countReset", &console, 0, interpreter);
-        make_builtin_fn(Self::group, "group", &console, 0, interpreter);
-        make_builtin_fn(Self::group, "groupCollapsed", &console, 0, interpreter);
-        make_builtin_fn(Self::group_end, "groupEnd", &console, 0, interpreter);
-        make_builtin_fn(Self::time, "time", &console, 0, interpreter);
-        make_builtin_fn(Self::time_log, "timeLog", &console, 0, interpreter);
-        make_builtin_fn(Self::time_end, "timeEnd", &console, 0, interpreter);
-        make_builtin_fn(Self::dir, "dir", &console, 0, interpreter);
-        make_builtin_fn(Self::dir, "dirxml", &console, 0, interpreter);
-
-        (Self::NAME, console)
     }
 }

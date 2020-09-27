@@ -11,7 +11,11 @@
 //! [spec]: https://tc39.es/ecma262/#sec-math-object
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math
 
-use crate::{builtins::function::make_builtin_fn, BoaProfiler, Context, Result, Value};
+use crate::{
+    builtins::{BuiltIn, ObjectBuilder},
+    property::Attribute,
+    BoaProfiler, Context, Result, Value,
+};
 use std::f64;
 
 #[cfg(test)]
@@ -22,9 +26,6 @@ mod tests;
 pub(crate) struct Math;
 
 impl Math {
-    /// The name of the object.
-    pub(crate) const NAME: &'static str = "Math";
-
     /// Get the absolute value of a number.
     ///
     /// More information:
@@ -632,69 +633,61 @@ impl Math {
             .map_or(f64::NAN, f64::trunc)
             .into())
     }
+}
 
-    /// Create a new `Math` object
-    pub(crate) fn create(interpreter: &mut Context) -> Value {
-        let global = interpreter.global_object();
-        let _timer = BoaProfiler::global().start_event("math:create", "init");
-        let math = Value::new_object(Some(global));
+impl BuiltIn for Math {
+    const NAME: &'static str = "Math";
 
-        {
-            let mut properties = math.as_object_mut().unwrap();
-            properties.insert_field("E", Value::from(f64::consts::E));
-            properties.insert_field("LN2", Value::from(f64::consts::LN_2));
-            properties.insert_field("LN10", Value::from(f64::consts::LN_10));
-            properties.insert_field("LOG2E", Value::from(f64::consts::LOG2_E));
-            properties.insert_field("LOG10E", Value::from(f64::consts::LOG10_E));
-            properties.insert_field("SQRT1_2", Value::from(0.5_f64.sqrt()));
-            properties.insert_field("SQRT2", Value::from(f64::consts::SQRT_2));
-            properties.insert_field("PI", Value::from(f64::consts::PI));
-        }
-
-        make_builtin_fn(Self::abs, "abs", &math, 1, interpreter);
-        make_builtin_fn(Self::acos, "acos", &math, 1, interpreter);
-        make_builtin_fn(Self::acosh, "acosh", &math, 1, interpreter);
-        make_builtin_fn(Self::asin, "asin", &math, 1, interpreter);
-        make_builtin_fn(Self::asinh, "asinh", &math, 1, interpreter);
-        make_builtin_fn(Self::atan, "atan", &math, 1, interpreter);
-        make_builtin_fn(Self::atanh, "atanh", &math, 1, interpreter);
-        make_builtin_fn(Self::atan2, "atan2", &math, 2, interpreter);
-        make_builtin_fn(Self::cbrt, "cbrt", &math, 1, interpreter);
-        make_builtin_fn(Self::ceil, "ceil", &math, 1, interpreter);
-        make_builtin_fn(Self::clz32, "clz32", &math, 1, interpreter);
-        make_builtin_fn(Self::cos, "cos", &math, 1, interpreter);
-        make_builtin_fn(Self::cosh, "cosh", &math, 1, interpreter);
-        make_builtin_fn(Self::exp, "exp", &math, 1, interpreter);
-        make_builtin_fn(Self::expm1, "expm1", &math, 1, interpreter);
-        make_builtin_fn(Self::floor, "floor", &math, 1, interpreter);
-        make_builtin_fn(Self::fround, "fround", &math, 1, interpreter);
-        make_builtin_fn(Self::hypot, "hypot", &math, 1, interpreter);
-        make_builtin_fn(Self::imul, "imul", &math, 1, interpreter);
-        make_builtin_fn(Self::log, "log", &math, 1, interpreter);
-        make_builtin_fn(Self::log1p, "log1p", &math, 1, interpreter);
-        make_builtin_fn(Self::log10, "log10", &math, 1, interpreter);
-        make_builtin_fn(Self::log2, "log2", &math, 1, interpreter);
-        make_builtin_fn(Self::max, "max", &math, 2, interpreter);
-        make_builtin_fn(Self::min, "min", &math, 2, interpreter);
-        make_builtin_fn(Self::pow, "pow", &math, 2, interpreter);
-        make_builtin_fn(Self::random, "random", &math, 0, interpreter);
-        make_builtin_fn(Self::round, "round", &math, 1, interpreter);
-        make_builtin_fn(Self::sign, "sign", &math, 1, interpreter);
-        make_builtin_fn(Self::sin, "sin", &math, 1, interpreter);
-        make_builtin_fn(Self::sinh, "sinh", &math, 1, interpreter);
-        make_builtin_fn(Self::sqrt, "sqrt", &math, 1, interpreter);
-        make_builtin_fn(Self::tan, "tan", &math, 1, interpreter);
-        make_builtin_fn(Self::tanh, "tanh", &math, 1, interpreter);
-        make_builtin_fn(Self::trunc, "trunc", &math, 1, interpreter);
-
-        math
-    }
-
-    /// Initialise the `Math` object on the global object.
-    #[inline]
-    pub(crate) fn init(interpreter: &mut Context) -> (&'static str, Value) {
+    fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
 
-        (Self::NAME, Self::create(interpreter))
+        let attribute = Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT;
+        let object = ObjectBuilder::new(context)
+            .static_property("E", f64::consts::E, attribute)
+            .static_property("LN2", f64::consts::LN_2, attribute)
+            .static_property("LN10", f64::consts::LN_10, attribute)
+            .static_property("LOG2E", f64::consts::LOG2_E, attribute)
+            .static_property("LOG10E", f64::consts::LOG10_E, attribute)
+            .static_property("SQRT1_2", 0.5_f64.sqrt(), attribute)
+            .static_property("SQRT2", f64::consts::SQRT_2, attribute)
+            .static_property("PI", f64::consts::PI, attribute)
+            .static_method(Self::abs, "abs", 1)
+            .static_method(Self::acos, "acos", 1)
+            .static_method(Self::acosh, "acosh", 1)
+            .static_method(Self::asin, "asin", 1)
+            .static_method(Self::asinh, "asinh", 1)
+            .static_method(Self::atan, "atan", 1)
+            .static_method(Self::atanh, "atanh", 1)
+            .static_method(Self::atan2, "atan2", 2)
+            .static_method(Self::cbrt, "cbrt", 1)
+            .static_method(Self::ceil, "ceil", 1)
+            .static_method(Self::clz32, "clz32", 1)
+            .static_method(Self::cos, "cos", 1)
+            .static_method(Self::cosh, "cosh", 1)
+            .static_method(Self::exp, "exp", 1)
+            .static_method(Self::expm1, "expm1", 1)
+            .static_method(Self::floor, "floor", 1)
+            .static_method(Self::fround, "fround", 1)
+            .static_method(Self::hypot, "hypot", 1)
+            .static_method(Self::imul, "imul", 1)
+            .static_method(Self::log, "log", 1)
+            .static_method(Self::log1p, "log1p", 1)
+            .static_method(Self::log10, "log10", 1)
+            .static_method(Self::log2, "log2", 1)
+            .static_method(Self::max, "max", 2)
+            .static_method(Self::min, "min", 2)
+            .static_method(Self::pow, "pow", 2)
+            .static_method(Self::random, "random", 0)
+            .static_method(Self::round, "round", 1)
+            .static_method(Self::sign, "sign", 1)
+            .static_method(Self::sin, "sin", 1)
+            .static_method(Self::sinh, "sinh", 1)
+            .static_method(Self::sqrt, "sqrt", 1)
+            .static_method(Self::tan, "tan", 1)
+            .static_method(Self::tanh, "tanh", 1)
+            .static_method(Self::trunc, "trunc", 1)
+            .build();
+
+        (Self::NAME, object, Self::attribute())
     }
 }

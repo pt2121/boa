@@ -396,6 +396,7 @@ impl Object {
         &self.prototype
     }
 
+    #[track_caller]
     pub fn set_prototype_instance(&mut self, prototype: Value) {
         assert!(prototype.is_null() || prototype.is_object());
         self.prototype = prototype

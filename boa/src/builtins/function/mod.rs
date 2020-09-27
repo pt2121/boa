@@ -12,7 +12,7 @@
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function
 
 use crate::{
-    builtins::Array,
+    builtins::{Array, BuiltIn, ConstructorBuilder},
     environment::lexical_environment::Environment,
     object::{Object, ObjectData, PROTOTYPE},
     property::{Attribute, Property},
@@ -195,17 +195,6 @@ pub fn create_unmapped_arguments_object(arguments_list: &[Value]) -> Value {
     Value::from(obj)
 }
 
-/// Create new function `[[Construct]]`
-///
-// This gets called when a new Function() is created.
-pub fn make_function(this: &Value, _: &[Value], _: &mut Context) -> Result<Value> {
-    this.set_data(ObjectData::Function(Function::BuiltIn(
-        BuiltInFunction(|_, _, _| Ok(Value::undefined())),
-        FunctionFlags::CALLABLE | FunctionFlags::CONSTRUCTABLE,
-    )));
-    Ok(this.clone())
-}
-
 /// Creates a new constructor function
 ///
 /// This utility function handling linking the new Constructor to the prototype.
@@ -305,15 +294,36 @@ pub fn make_builtin_fn<N>(
         .insert_field(name, Value::from(function));
 }
 
-/// Initialise the `Function` object on the global object.
-#[inline]
-pub fn init(interpreter: &mut Context) -> (&'static str, Value) {
-    let global = interpreter.global_object();
-    let _timer = BoaProfiler::global().start_event("function", "init");
-    let prototype = Value::new_object(Some(global));
+#[derive(Debug, Clone, Copy)]
+pub struct BuiltInFunctionObject;
 
-    let function_object =
-        make_constructor_fn("Function", 1, make_function, global, prototype, true, true);
+impl BuiltInFunctionObject {
+    pub const LENGTH: usize = 1;
 
-    ("Function", function_object)
+    fn constructor(this: &Value, _args: &[Value], _context: &mut Context) -> Result<Value> {
+        this.set_data(ObjectData::Function(Function::BuiltIn(
+            BuiltInFunction(|_, _, _| Ok(Value::undefined())),
+            FunctionFlags::CALLABLE | FunctionFlags::CONSTRUCTABLE,
+        )));
+        Ok(this.clone())
+    }
+}
+
+impl BuiltIn for BuiltInFunctionObject {
+    const NAME: &'static str = "Function";
+
+    fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
+        let _timer = BoaProfiler::global().start_event("function", "init");
+
+        let function_object = ConstructorBuilder::with_standard_object(
+            context,
+            Self::constructor,
+            context.standard_objects().function_object().clone(),
+        )
+        .name(Self::NAME)
+        .length(Self::LENGTH)
+        .build();
+
+        (Self::NAME, function_object, Self::attribute())
+    }
 }

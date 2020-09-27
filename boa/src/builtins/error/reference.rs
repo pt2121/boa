@@ -10,24 +10,45 @@
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError
 
 use crate::{
-    builtins::{function::make_builtin_fn, function::make_constructor_fn},
+    builtins::{BuiltIn, ConstructorBuilder},
     object::ObjectData,
     profiler::BoaProfiler,
+    property::Attribute,
     Context, Result, Value,
 };
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct ReferenceError;
 
-impl ReferenceError {
-    /// The name of the object.
-    pub(crate) const NAME: &'static str = "ReferenceError";
+impl BuiltIn for ReferenceError {
+    const NAME: &'static str = "ReferenceError";
 
+    fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
+        let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
+
+        let attribute = Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE;
+        let range_error_object = ConstructorBuilder::with_standard_object(
+            context,
+            Self::constructor,
+            context.standard_objects().reference_error_object().clone(),
+        )
+        .name(Self::NAME)
+        .length(Self::LENGTH)
+        .property("name", Self::NAME, attribute)
+        .property("message", "", attribute)
+        .method(Self::to_string, "toString", 0)
+        .build();
+
+        (Self::NAME, range_error_object, Self::attribute())
+    }
+}
+
+impl ReferenceError {
     /// The amount of arguments this function object takes.
     pub(crate) const LENGTH: usize = 1;
 
     /// Create a new error object.
-    pub(crate) fn make_error(this: &Value, args: &[Value], ctx: &mut Context) -> Result<Value> {
+    pub(crate) fn constructor(this: &Value, args: &[Value], ctx: &mut Context) -> Result<Value> {
         if let Some(message) = args.get(0) {
             this.set_field("message", message.to_string(ctx)?);
         }
@@ -54,29 +75,5 @@ impl ReferenceError {
         let message = this.get_field("message").to_string(ctx)?;
 
         Ok(Value::from(format!("{}: {}", name, message)))
-    }
-
-    /// Initialise the global object with the `ReferenceError` object.
-    pub(crate) fn init(interpreter: &mut Context) -> (&'static str, Value) {
-        let global = interpreter.global_object();
-        let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
-
-        let prototype = Value::new_object(Some(global));
-        prototype.set_field("name", Self::NAME);
-        prototype.set_field("message", "");
-
-        make_builtin_fn(Self::to_string, "toString", &prototype, 0, interpreter);
-
-        let reference_error_object = make_constructor_fn(
-            Self::NAME,
-            Self::LENGTH,
-            Self::make_error,
-            global,
-            prototype,
-            true,
-            true,
-        );
-
-        (Self::NAME, reference_error_object)
     }
 }

@@ -27,6 +27,123 @@ use crate::{
 };
 use std::result::Result as StdResult;
 
+#[derive(Debug, Clone)]
+pub struct StandardConstructor {
+    pub(crate) constructor: GcObject,
+    pub(crate) prototype: GcObject,
+}
+
+impl Default for StandardConstructor {
+    fn default() -> Self {
+        Self {
+            constructor: GcObject::new(Object::default()),
+            prototype: GcObject::new(Object::default()),
+        }
+    }
+}
+
+impl StandardConstructor {
+    #[inline]
+    pub fn constructor(&self) -> GcObject {
+        self.constructor.clone()
+    }
+
+    #[inline]
+    pub fn prototype(&self) -> GcObject {
+        self.prototype.clone()
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct StandardObjects {
+    object: StandardConstructor,
+    function: StandardConstructor,
+    array: StandardConstructor,
+    bigint: StandardConstructor,
+    number: StandardConstructor,
+    boolean: StandardConstructor,
+    string: StandardConstructor,
+    regexp: StandardConstructor,
+    symbol: StandardConstructor,
+    error: StandardConstructor,
+    type_error: StandardConstructor,
+    referece_error: StandardConstructor,
+    range_error: StandardConstructor,
+    syntax_error: StandardConstructor,
+}
+
+impl StandardObjects {
+    #[inline]
+    pub fn object_object(&self) -> &StandardConstructor {
+        &self.object
+    }
+
+    #[inline]
+    pub fn function_object(&self) -> &StandardConstructor {
+        &self.function
+    }
+
+    #[inline]
+    pub fn array_object(&self) -> &StandardConstructor {
+        &self.array
+    }
+
+    #[inline]
+    pub fn bigint_object(&self) -> &StandardConstructor {
+        &self.bigint
+    }
+
+    #[inline]
+    pub fn number_object(&self) -> &StandardConstructor {
+        &self.number
+    }
+
+    #[inline]
+    pub fn boolean_object(&self) -> &StandardConstructor {
+        &self.boolean
+    }
+
+    #[inline]
+    pub fn string_object(&self) -> &StandardConstructor {
+        &self.string
+    }
+
+    #[inline]
+    pub fn regexp_object(&self) -> &StandardConstructor {
+        &self.regexp
+    }
+
+    #[inline]
+    pub fn symbol_object(&self) -> &StandardConstructor {
+        &self.symbol
+    }
+
+    #[inline]
+    pub fn error_object(&self) -> &StandardConstructor {
+        &self.error
+    }
+
+    #[inline]
+    pub fn reference_error_object(&self) -> &StandardConstructor {
+        &self.referece_error
+    }
+
+    #[inline]
+    pub fn type_error_object(&self) -> &StandardConstructor {
+        &self.type_error
+    }
+
+    #[inline]
+    pub fn range_error_object(&self) -> &StandardConstructor {
+        &self.range_error
+    }
+
+    #[inline]
+    pub fn syntax_error_object(&self) -> &StandardConstructor {
+        &self.syntax_error
+    }
+}
+
 /// Javascript context. It is the primary way to interact with the runtime.
 ///
 /// For each `Context` instance a new instance of runtime is created.
@@ -50,6 +167,9 @@ pub struct Context {
 
     /// Cached well known symbols
     well_known_symbols: WellKnownSymbols,
+
+    /// Cached standard objects and their prototypes
+    standard_objects: StandardObjects,
 }
 
 impl Default for Context {
@@ -63,6 +183,7 @@ impl Default for Context {
             symbol_count,
             console: Console::default(),
             well_known_symbols,
+            standard_objects: Default::default(),
         };
 
         // Add new builtIns to Context Realm
@@ -516,5 +637,10 @@ impl Context {
     #[inline]
     pub fn well_known_symbols(&self) -> &WellKnownSymbols {
         &self.well_known_symbols
+    }
+
+    #[inline]
+    pub fn standard_objects(&self) -> &StandardObjects {
+        &self.standard_objects
     }
 }

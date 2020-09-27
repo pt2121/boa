@@ -46,7 +46,7 @@ pub mod realm;
 pub mod syntax;
 pub mod value;
 
-mod context;
+pub mod context;
 
 use std::result::Result as StdResult;
 
