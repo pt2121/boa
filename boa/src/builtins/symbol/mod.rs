@@ -19,8 +19,9 @@
 mod tests;
 
 use crate::{
-    builtins::{BuiltIn, ConstructorBuilder},
+    builtins::BuiltIn,
     gc::{Finalize, Trace},
+    object::ConstructorBuilder,
     property::Attribute,
     value::{RcString, RcSymbol, Value},
     BoaProfiler, Context, Result,

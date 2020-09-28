@@ -16,8 +16,8 @@
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
 
 use crate::{
-    builtins::{BuiltIn, ConstructorBuilder},
-    object::ObjectData,
+    builtins::BuiltIn,
+    object::{ConstructorBuilder, ObjectData},
     property::Attribute,
     BoaProfiler, Context, Result, Value,
 };

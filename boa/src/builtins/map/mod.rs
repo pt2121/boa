@@ -1,8 +1,8 @@
 #![allow(clippy::mutable_key_type)]
 
 use crate::{
-    builtins::{BuiltIn, ConstructorBuilder},
-    object::{ObjectData, PROTOTYPE},
+    builtins::BuiltIn,
+    object::{ConstructorBuilder, ObjectData, PROTOTYPE},
     property::{Attribute, Property},
     BoaProfiler, Context, Result, Value,
 };

@@ -13,8 +13,8 @@
 mod tests;
 
 use crate::{
-    builtins::{BuiltIn, ConstructorBuilder},
-    object::{ObjectData, PROTOTYPE},
+    builtins::BuiltIn,
+    object::{ConstructorBuilder, ObjectData, PROTOTYPE},
     property::{Attribute, Property},
     value::{same_value_zero, Value},
     BoaProfiler, Context, Result,

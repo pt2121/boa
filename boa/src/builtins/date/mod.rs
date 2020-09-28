@@ -2,8 +2,8 @@
 mod tests;
 
 use crate::{
-    builtins::{BuiltIn, ConstructorBuilder},
-    object::ObjectData,
+    builtins::BuiltIn,
+    object::{ConstructorBuilder, ObjectData},
     value::{PreferredType, Value},
     BoaProfiler, Context, Result,
 };

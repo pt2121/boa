@@ -14,7 +14,8 @@
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON
 
 use crate::{
-    builtins::{BuiltIn, ObjectBuilder},
+    builtins::BuiltIn,
+    object::ObjectBuilder,
     property::{Attribute, Property, PropertyKey},
     BoaProfiler, Context, Result, Value,
 };
@@ -26,6 +27,20 @@ mod tests;
 /// JavaScript `JSON` global object.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Json;
+
+impl BuiltIn for Json {
+    const NAME: &'static str = "JSON";
+
+    fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
+        let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
+        let mut builder = ObjectBuilder::new(context);
+
+        builder.static_method(Self::parse, "parse", 2);
+        builder.static_method(Self::stringify, "stringify", 3);
+
+        (Self::NAME, builder.build(), Self::attribute())
+    }
+}
 
 impl Json {
     /// `JSON.parse( text[, reviver] )`
@@ -171,19 +186,5 @@ impl Json {
         } else {
             Ok(Value::from(object.to_json(ctx)?.to_string()))
         }
-    }
-}
-
-impl BuiltIn for Json {
-    const NAME: &'static str = "JSON";
-
-    fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
-        let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
-        let mut builder = ObjectBuilder::new(context);
-
-        builder.static_method(Self::parse, "parse", 2);
-        builder.static_method(Self::stringify, "stringify", 3);
-
-        (Self::NAME, builder.build(), Self::attribute())
     }
 }

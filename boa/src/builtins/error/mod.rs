@@ -11,8 +11,8 @@
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
 
 use crate::{
-    builtins::{BuiltIn, ConstructorBuilder},
-    object::ObjectData,
+    builtins::BuiltIn,
+    object::{ConstructorBuilder, ObjectData},
     profiler::BoaProfiler,
     property::Attribute,
     Context, Result, Value,

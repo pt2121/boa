@@ -10,9 +10,9 @@
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
 
 use crate::{
-    builtins::{BuiltIn, ConstructorBuilder},
+    builtins::BuiltIn,
     gc::{empty_trace, Finalize, Trace},
-    object::ObjectData,
+    object::{ConstructorBuilder, ObjectData},
     property::{Attribute, Property},
     value::{RcString, Value},
     BoaProfiler, Context, Result,

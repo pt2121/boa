@@ -14,8 +14,8 @@
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object
 
 use crate::{
-    builtins::{BuiltIn, ConstructorBuilder},
-    object::{Object as BuiltinObject, ObjectData},
+    builtins::BuiltIn,
+    object::{ConstructorBuilder, Object as BuiltinObject, ObjectData},
     property::{Attribute, Property},
     value::{same_value, Value},
     BoaProfiler, Context, Result,

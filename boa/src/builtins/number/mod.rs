@@ -15,8 +15,8 @@
 
 use super::function::make_builtin_fn;
 use crate::{
-    builtins::{BuiltIn, ConstructorBuilder},
-    object::ObjectData,
+    builtins::BuiltIn,
+    object::{ConstructorBuilder, ObjectData},
     property::Attribute,
     value::{AbstractRelation, Value},
     BoaProfiler, Context, Result,

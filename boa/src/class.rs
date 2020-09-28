@@ -61,8 +61,8 @@
 //! [class-trait]: ./trait.Class.html
 
 use crate::{
-    builtins::{function::NativeFunction, ConstructorBuilder},
-    object::{GcObject, NativeObject, ObjectData},
+    builtins::function::NativeFunction,
+    object::{ConstructorBuilder, GcObject, NativeObject, ObjectData},
     property::{Attribute, PropertyKey},
     Context, Result, Value,
 };

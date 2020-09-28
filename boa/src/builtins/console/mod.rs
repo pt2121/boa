@@ -17,7 +17,8 @@
 mod tests;
 
 use crate::{
-    builtins::{BuiltIn, ObjectBuilder},
+    builtins::BuiltIn,
+    object::ObjectBuilder,
     property::Attribute,
     value::{display_obj, RcString, Value},
     BoaProfiler, Context, Result,

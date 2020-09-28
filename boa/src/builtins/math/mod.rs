@@ -12,9 +12,8 @@
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math
 
 use crate::{
-    builtins::{BuiltIn, ObjectBuilder},
-    property::Attribute,
-    BoaProfiler, Context, Result, Value,
+    builtins::BuiltIn, object::ObjectBuilder, property::Attribute, BoaProfiler, Context, Result,
+    Value,
 };
 use std::f64;
 
@@ -24,6 +23,63 @@ mod tests;
 /// Javascript `Math` object.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Math;
+
+impl BuiltIn for Math {
+    const NAME: &'static str = "Math";
+
+    fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
+        let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
+
+        let attribute = Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT;
+        let object = ObjectBuilder::new(context)
+            .static_property("E", f64::consts::E, attribute)
+            .static_property("LN2", f64::consts::LN_2, attribute)
+            .static_property("LN10", f64::consts::LN_10, attribute)
+            .static_property("LOG2E", f64::consts::LOG2_E, attribute)
+            .static_property("LOG10E", f64::consts::LOG10_E, attribute)
+            .static_property("SQRT1_2", 0.5_f64.sqrt(), attribute)
+            .static_property("SQRT2", f64::consts::SQRT_2, attribute)
+            .static_property("PI", f64::consts::PI, attribute)
+            .static_method(Self::abs, "abs", 1)
+            .static_method(Self::acos, "acos", 1)
+            .static_method(Self::acosh, "acosh", 1)
+            .static_method(Self::asin, "asin", 1)
+            .static_method(Self::asinh, "asinh", 1)
+            .static_method(Self::atan, "atan", 1)
+            .static_method(Self::atanh, "atanh", 1)
+            .static_method(Self::atan2, "atan2", 2)
+            .static_method(Self::cbrt, "cbrt", 1)
+            .static_method(Self::ceil, "ceil", 1)
+            .static_method(Self::clz32, "clz32", 1)
+            .static_method(Self::cos, "cos", 1)
+            .static_method(Self::cosh, "cosh", 1)
+            .static_method(Self::exp, "exp", 1)
+            .static_method(Self::expm1, "expm1", 1)
+            .static_method(Self::floor, "floor", 1)
+            .static_method(Self::fround, "fround", 1)
+            .static_method(Self::hypot, "hypot", 1)
+            .static_method(Self::imul, "imul", 1)
+            .static_method(Self::log, "log", 1)
+            .static_method(Self::log1p, "log1p", 1)
+            .static_method(Self::log10, "log10", 1)
+            .static_method(Self::log2, "log2", 1)
+            .static_method(Self::max, "max", 2)
+            .static_method(Self::min, "min", 2)
+            .static_method(Self::pow, "pow", 2)
+            .static_method(Self::random, "random", 0)
+            .static_method(Self::round, "round", 1)
+            .static_method(Self::sign, "sign", 1)
+            .static_method(Self::sin, "sin", 1)
+            .static_method(Self::sinh, "sinh", 1)
+            .static_method(Self::sqrt, "sqrt", 1)
+            .static_method(Self::tan, "tan", 1)
+            .static_method(Self::tanh, "tanh", 1)
+            .static_method(Self::trunc, "trunc", 1)
+            .build();
+
+        (Self::NAME, object, Self::attribute())
+    }
+}
 
 impl Math {
     /// Get the absolute value of a number.
@@ -632,62 +688,5 @@ impl Math {
             .transpose()?
             .map_or(f64::NAN, f64::trunc)
             .into())
-    }
-}
-
-impl BuiltIn for Math {
-    const NAME: &'static str = "Math";
-
-    fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
-        let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
-
-        let attribute = Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT;
-        let object = ObjectBuilder::new(context)
-            .static_property("E", f64::consts::E, attribute)
-            .static_property("LN2", f64::consts::LN_2, attribute)
-            .static_property("LN10", f64::consts::LN_10, attribute)
-            .static_property("LOG2E", f64::consts::LOG2_E, attribute)
-            .static_property("LOG10E", f64::consts::LOG10_E, attribute)
-            .static_property("SQRT1_2", 0.5_f64.sqrt(), attribute)
-            .static_property("SQRT2", f64::consts::SQRT_2, attribute)
-            .static_property("PI", f64::consts::PI, attribute)
-            .static_method(Self::abs, "abs", 1)
-            .static_method(Self::acos, "acos", 1)
-            .static_method(Self::acosh, "acosh", 1)
-            .static_method(Self::asin, "asin", 1)
-            .static_method(Self::asinh, "asinh", 1)
-            .static_method(Self::atan, "atan", 1)
-            .static_method(Self::atanh, "atanh", 1)
-            .static_method(Self::atan2, "atan2", 2)
-            .static_method(Self::cbrt, "cbrt", 1)
-            .static_method(Self::ceil, "ceil", 1)
-            .static_method(Self::clz32, "clz32", 1)
-            .static_method(Self::cos, "cos", 1)
-            .static_method(Self::cosh, "cosh", 1)
-            .static_method(Self::exp, "exp", 1)
-            .static_method(Self::expm1, "expm1", 1)
-            .static_method(Self::floor, "floor", 1)
-            .static_method(Self::fround, "fround", 1)
-            .static_method(Self::hypot, "hypot", 1)
-            .static_method(Self::imul, "imul", 1)
-            .static_method(Self::log, "log", 1)
-            .static_method(Self::log1p, "log1p", 1)
-            .static_method(Self::log10, "log10", 1)
-            .static_method(Self::log2, "log2", 1)
-            .static_method(Self::max, "max", 2)
-            .static_method(Self::min, "min", 2)
-            .static_method(Self::pow, "pow", 2)
-            .static_method(Self::random, "random", 0)
-            .static_method(Self::round, "round", 1)
-            .static_method(Self::sign, "sign", 1)
-            .static_method(Self::sin, "sin", 1)
-            .static_method(Self::sinh, "sinh", 1)
-            .static_method(Self::sqrt, "sqrt", 1)
-            .static_method(Self::tan, "tan", 1)
-            .static_method(Self::tanh, "tanh", 1)
-            .static_method(Self::trunc, "trunc", 1)
-            .build();
-
-        (Self::NAME, object, Self::attribute())
     }
 }

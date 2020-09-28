@@ -1,15 +1,22 @@
 //! This module implements the Rust representation of a JavaScript object.
 
 use crate::{
-    builtins::{function::Function, map::ordered_map::OrderedMap, BigInt, Date, RegExp},
-    property::{Property, PropertyKey},
+    builtins::{
+        function::{Function, FunctionFlags, NativeFunction},
+        map::ordered_map::OrderedMap,
+        BigInt, Date, RegExp,
+    },
+    context::StandardConstructor,
+    property::{Attribute, Property, PropertyKey},
     value::{RcBigInt, RcString, RcSymbol, Value},
-    BoaProfiler,
+    BoaProfiler, Context,
 };
 use gc::{Finalize, Trace};
 use rustc_hash::FxHashMap;
-use std::fmt::{Debug, Display, Error, Formatter};
-use std::{any::Any, result::Result as StdResult};
+use std::{
+    any::Any,
+    fmt::{self, Debug, Display},
+};
 
 mod gcobject;
 mod internal_methods;
@@ -78,7 +85,7 @@ pub enum ObjectData {
 }
 
 impl Display for ObjectData {
-    fn fmt(&self, f: &mut Formatter<'_>) -> StdResult<(), Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{}",
@@ -454,5 +461,268 @@ impl Object {
             }
             _ => None,
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct ObjectBuilder<'context> {
+    context: &'context mut Context,
+    object: GcObject,
+}
+
+impl<'context> ObjectBuilder<'context> {
+    pub fn new(context: &'context mut Context) -> Self {
+        let object = context.construct_object();
+        Self { context, object }
+    }
+
+    pub fn static_method(
+        &mut self,
+        function: NativeFunction,
+        name: &str,
+        length: usize,
+    ) -> &mut Self {
+        let mut function = Object::function(
+            Function::BuiltIn(function.into(), FunctionFlags::CALLABLE),
+            self.context
+                .standard_objects()
+                .function_object()
+                .prototype()
+                .into(),
+        );
+        function.insert_property("length", length, Attribute::all());
+        function.insert_property("name", name, Attribute::all());
+
+        self.object
+            .borrow_mut()
+            .insert_property(name, function, Attribute::all());
+        self
+    }
+
+    pub fn static_property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
+    where
+        K: Into<PropertyKey>,
+        V: Into<Value>,
+    {
+        let property = Property::data_descriptor(value.into(), attribute);
+        self.object.borrow_mut().insert(key, property);
+        self
+    }
+
+    pub fn build(&mut self) -> Value {
+        self.object.clone().into()
+    }
+}
+
+pub struct ConstructorBuilder<'context> {
+    context: &'context mut Context,
+    constrcutor_function: NativeFunction,
+    constructor_object: GcObject,
+    prototype: GcObject,
+    name: String,
+    length: usize,
+    callable: bool,
+    constructable: bool,
+    inherit: Option<Value>,
+}
+
+impl Debug for ConstructorBuilder<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ConstructorBuilder")
+            .field("name", &self.name)
+            .field("length", &self.length)
+            .field("constructor", &self.constructor_object)
+            .field("prototype", &self.prototype)
+            .field("inherit", &self.inherit)
+            .field("callable", &self.callable)
+            .field("constructable", &self.constructable)
+            .finish()
+    }
+}
+
+impl<'context> ConstructorBuilder<'context> {
+    pub fn new(context: &'context mut Context, constructor: NativeFunction) -> Self {
+        Self {
+            context,
+            constrcutor_function: constructor,
+            constructor_object: GcObject::new(Object::default()),
+            prototype: GcObject::new(Object::default()),
+            length: 0,
+            name: "[Object]".to_string(),
+            callable: true,
+            constructable: true,
+            inherit: None,
+        }
+    }
+
+    pub(crate) fn with_standard_object(
+        context: &'context mut Context,
+        constructor: NativeFunction,
+        object: StandardConstructor,
+    ) -> Self {
+        Self {
+            context,
+            constrcutor_function: constructor,
+            constructor_object: object.constructor,
+            prototype: object.prototype,
+            length: 0,
+            name: "[Object]".to_string(),
+            callable: true,
+            constructable: true,
+            inherit: None,
+        }
+    }
+
+    pub fn method(&mut self, function: NativeFunction, name: &str, length: usize) -> &mut Self {
+        let mut function = Object::function(
+            Function::BuiltIn(function.into(), FunctionFlags::CALLABLE),
+            self.context
+                .standard_objects()
+                .function_object()
+                .prototype()
+                .into(),
+        );
+        function.insert_property("length", length, Attribute::all());
+        function.insert_property("name", name, Attribute::all());
+
+        self.prototype
+            .borrow_mut()
+            .insert_property(name, function, Attribute::all());
+        self
+    }
+
+    pub fn static_method(
+        &mut self,
+        function: NativeFunction,
+        name: &str,
+        length: usize,
+    ) -> &mut Self {
+        let mut function = Object::function(
+            Function::BuiltIn(function.into(), FunctionFlags::CALLABLE),
+            self.context
+                .standard_objects()
+                .function_object()
+                .prototype()
+                .into(),
+        );
+        function.insert_property("length", length, Attribute::all());
+        function.insert_property("name", name, Attribute::all());
+
+        self.constructor_object
+            .borrow_mut()
+            .insert_property(name, function, Attribute::all());
+        self
+    }
+
+    pub fn property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
+    where
+        K: Into<PropertyKey>,
+        V: Into<Value>,
+    {
+        let property = Property::data_descriptor(value.into(), attribute);
+        self.prototype.borrow_mut().insert(key, property);
+        self
+    }
+
+    pub fn static_property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
+    where
+        K: Into<PropertyKey>,
+        V: Into<Value>,
+    {
+        let property = Property::data_descriptor(value.into(), attribute);
+        self.constructor_object.borrow_mut().insert(key, property);
+        self
+    }
+
+    pub fn length(&mut self, length: usize) -> &mut Self {
+        self.length = length;
+        self
+    }
+
+    pub fn name<N>(&mut self, name: N) -> &mut Self
+    where
+        N: Into<String>,
+    {
+        self.name = name.into();
+        self
+    }
+
+    pub fn callable(&mut self, callable: bool) -> &mut Self {
+        self.callable = callable;
+        self
+    }
+
+    pub fn constructable(&mut self, constructable: bool) -> &mut Self {
+        self.constructable = constructable;
+        self
+    }
+
+    pub fn inherit(&mut self, prototype: Value) -> &mut Self {
+        assert!(prototype.is_object() || prototype.is_null());
+        self.inherit = Some(prototype);
+        self
+    }
+
+    pub fn context(&mut self) -> &'_ mut Context {
+        self.context
+    }
+
+    pub fn build(&mut self) -> GcObject {
+        // Create the native function
+        let function = Function::BuiltIn(
+            self.constrcutor_function.into(),
+            FunctionFlags::from_parameters(self.callable, self.constructable),
+        );
+
+        let length = Property::data_descriptor(
+            self.length.into(),
+            Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT,
+        );
+        let mut name = String::new();
+        std::mem::swap(&mut self.name, &mut name);
+        let name = Property::data_descriptor(
+            name.into(),
+            Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT,
+        );
+
+        {
+            let mut constructor = self.constructor_object.borrow_mut();
+            constructor.data = ObjectData::Function(function);
+            constructor.insert("length", length);
+            constructor.insert("name", name);
+
+            constructor.set_prototype_instance(
+                self.context
+                    .standard_objects()
+                    .function_object()
+                    .prototype()
+                    .into(),
+            );
+
+            constructor.insert_property(PROTOTYPE, self.prototype.clone(), Attribute::all());
+        }
+
+        {
+            let mut prototype = self.prototype.borrow_mut();
+            prototype.insert_property(
+                "constructor",
+                self.constructor_object.clone(),
+                Attribute::all(),
+            );
+
+            if let Some(proto) = self.inherit.take() {
+                prototype.set_prototype_instance(proto);
+            } else {
+                prototype.set_prototype_instance(
+                    self.context
+                        .standard_objects()
+                        .object_object()
+                        .prototype()
+                        .into(),
+                );
+            }
+        }
+
+        self.constructor_object.clone()
     }
 }
