@@ -105,7 +105,7 @@ impl<T: Class> ClassConstructor for T {
 }
 
 /// Class builder which allows adding methods and static methods to the class.
-#[allow(missing_debug_implementations)]
+#[derive(Debug)]
 pub struct ClassBuilder<'context> {
     builder: ConstructorBuilder<'context>,
 }

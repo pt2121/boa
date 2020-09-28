@@ -48,6 +48,10 @@ use crate::{
     property::{Attribute, Property, PropertyKey},
     Context, Value,
 };
+use std::{
+    fmt::{self, Debug},
+    string::String as StdString,
+};
 
 #[derive(Debug)]
 pub struct ObjectBuilder<'context> {
@@ -99,9 +103,6 @@ impl<'context> ObjectBuilder<'context> {
     }
 }
 
-use std::string::String as StdString;
-
-#[allow(missing_debug_implementations)]
 pub struct ConstructorBuilder<'context> {
     context: &'context mut Context,
     constrcutor_function: NativeFunction,
@@ -112,6 +113,20 @@ pub struct ConstructorBuilder<'context> {
     callable: bool,
     constructable: bool,
     inherit: Option<Value>,
+}
+
+impl Debug for ConstructorBuilder<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ConstructorBuilder")
+            .field("name", &self.name)
+            .field("length", &self.length)
+            .field("constructor", &self.constructor_object)
+            .field("prototype", &self.prototype)
+            .field("inherit", &self.inherit)
+            .field("callable", &self.callable)
+            .field("constructable", &self.constructable)
+            .finish()
+    }
 }
 
 impl<'context> ConstructorBuilder<'context> {
