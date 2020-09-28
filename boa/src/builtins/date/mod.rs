@@ -178,7 +178,7 @@ impl BuiltIn for Date {
             .static_method(Self::utc, "UTC", 7)
             .build();
 
-        (Self::NAME, date_object, Self::attribute())
+        (Self::NAME, date_object.into(), Self::attribute())
     }
 }
 

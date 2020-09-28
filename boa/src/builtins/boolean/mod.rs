@@ -41,7 +41,7 @@ impl BuiltIn for Boolean {
         .method(Self::value_of, "valueOf", 0)
         .build();
 
-        (Self::NAME, boolean_object, Self::attribute())
+        (Self::NAME, boolean_object.into(), Self::attribute())
     }
 }
 

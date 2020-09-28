@@ -243,8 +243,7 @@ impl<'context> ConstructorBuilder<'context> {
         self.context
     }
 
-    // TODO: Should return GcObject
-    pub fn build(&mut self) -> Value {
+    pub fn build(&mut self) -> GcObject {
         // Create the native function
         let function = Function::BuiltIn(
             self.constrcutor_function.into(),
@@ -300,7 +299,7 @@ impl<'context> ConstructorBuilder<'context> {
             }
         }
 
-        self.constructor_object.clone().into()
+        self.constructor_object.clone()
     }
 }
 

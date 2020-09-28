@@ -33,7 +33,7 @@ impl BuiltIn for Map {
             .callable(false)
             .build();
 
-        (Self::NAME, map_object, Self::attribute())
+        (Self::NAME, map_object.into(), Self::attribute())
     }
 }
 

@@ -52,7 +52,7 @@ impl BuiltIn for Object {
         .static_method(Self::is, "is", 2)
         .build();
 
-        (Self::NAME, object, Self::attribute())
+        (Self::NAME, object.into(), Self::attribute())
     }
 }
 

@@ -281,7 +281,7 @@ impl BuiltIn for Symbol {
         .constructable(false)
         .build();
 
-        (Self::NAME, symbol_object, Self::attribute())
+        (Self::NAME, symbol_object.into(), Self::attribute())
     }
 }
 

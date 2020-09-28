@@ -65,7 +65,7 @@ impl BuiltIn for Array {
         .static_method(Self::is_array, "isArray", 1)
         .build();
 
-        (Self::NAME, array, Self::attribute())
+        (Self::NAME, array.into(), Self::attribute())
     }
 }
 

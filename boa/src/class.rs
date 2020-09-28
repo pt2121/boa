@@ -122,11 +122,7 @@ impl<'context> ClassBuilder<'context> {
     }
 
     pub(crate) fn build(mut self) -> GcObject {
-        if let Value::Object(ref object) = self.builder.build() {
-            object.clone()
-        } else {
-            unreachable!()
-        }
+        self.builder.build()
     }
 
     /// Add a method to the class.

@@ -94,7 +94,7 @@ impl BuiltIn for Number {
         make_builtin_fn(Self::global_is_finite, "isFinite", &global, 1, context);
         make_builtin_fn(Self::global_is_nan, "isNaN", &global, 1, context);
 
-        (Self::NAME, number_object, Self::attribute())
+        (Self::NAME, number_object.into(), Self::attribute())
     }
 }
 

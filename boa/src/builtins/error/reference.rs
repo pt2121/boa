@@ -39,7 +39,7 @@ impl BuiltIn for ReferenceError {
         .method(Self::to_string, "toString", 0)
         .build();
 
-        (Self::NAME, range_error_object, Self::attribute())
+        (Self::NAME, range_error_object.into(), Self::attribute())
     }
 }
 

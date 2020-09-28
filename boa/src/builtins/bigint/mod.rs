@@ -62,7 +62,7 @@ impl BuiltIn for BigInt {
         .constructable(false)
         .build();
 
-        (Self::NAME, bigint_object, Self::attribute())
+        (Self::NAME, bigint_object.into(), Self::attribute())
     }
 }
 

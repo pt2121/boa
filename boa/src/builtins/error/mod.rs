@@ -55,7 +55,7 @@ impl BuiltIn for Error {
         .method(Self::to_string, "toString", 0)
         .build();
 
-        (Self::NAME, error_object, Self::attribute())
+        (Self::NAME, error_object.into(), Self::attribute())
     }
 }
 

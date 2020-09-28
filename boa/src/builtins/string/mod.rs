@@ -71,7 +71,7 @@ impl BuiltIn for String {
         .method(Self::replace, "replace", 2)
         .build();
 
-        (Self::NAME, string_object, Self::attribute())
+        (Self::NAME, string_object.into(), Self::attribute())
     }
 }
 

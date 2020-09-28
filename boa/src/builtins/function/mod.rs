@@ -325,6 +325,6 @@ impl BuiltIn for BuiltInFunctionObject {
         .length(Self::LENGTH)
         .build();
 
-        (Self::NAME, function_object, Self::attribute())
+        (Self::NAME, function_object.into(), Self::attribute())
     }
 }

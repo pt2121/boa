@@ -81,7 +81,7 @@ impl BuiltIn for RegExp {
 
         // TODO: add them RegExp accessor properties
 
-        (Self::NAME, regexp_object, Self::attribute())
+        (Self::NAME, regexp_object.into(), Self::attribute())
     }
 }
 
