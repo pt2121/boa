@@ -41,6 +41,7 @@ impl BuiltIn for Object {
         )
         .name(Self::NAME)
         .length(Self::LENGTH)
+        .inherit(Value::null())
         .method(Self::has_own_property, "hasOwnProperty", 0)
         .method(Self::property_is_enumerable, "propertyIsEnumerable", 0)
         .method(Self::to_string, "toString", 0)
@@ -50,13 +51,6 @@ impl BuiltIn for Object {
         .static_method(Self::define_property, "defineProperty", 3)
         .static_method(Self::is, "is", 2)
         .build();
-
-        context
-            .standard_objects()
-            .object_object()
-            .prototype
-            .borrow_mut()
-            .set_prototype_instance(Value::null());
 
         (Self::NAME, object, Self::attribute())
     }

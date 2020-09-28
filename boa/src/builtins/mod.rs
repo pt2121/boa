@@ -109,6 +109,7 @@ pub struct ConstructorBuilder<'context> {
     length: usize,
     callable: bool,
     constructable: bool,
+    inherit: Option<Value>,
 }
 
 impl<'context> ConstructorBuilder<'context> {
@@ -122,6 +123,7 @@ impl<'context> ConstructorBuilder<'context> {
             name: "[Object]".to_string(),
             callable: true,
             constructable: true,
+            inherit: None,
         }
     }
 
@@ -139,6 +141,7 @@ impl<'context> ConstructorBuilder<'context> {
             name: "[Object]".to_string(),
             callable: true,
             constructable: true,
+            inherit: None,
         }
     }
 
@@ -228,6 +231,12 @@ impl<'context> ConstructorBuilder<'context> {
         self
     }
 
+    pub fn inherit(&mut self, prototype: Value) -> &mut Self {
+        assert!(prototype.is_object() || prototype.is_null());
+        self.inherit = Some(prototype);
+        self
+    }
+
     fn build(&mut self) -> Value {
         // Create the native function
         let function = Function::BuiltIn(
@@ -266,13 +275,18 @@ impl<'context> ConstructorBuilder<'context> {
         {
             let mut prototype = self.prototype.borrow_mut();
             prototype.insert_field("constructor", self.constructor_object.clone().into());
-            prototype.set_prototype_instance(
-                self.context
-                    .standard_objects()
-                    .object_object()
-                    .prototype()
-                    .into(),
-            );
+
+            if let Some(proto) = self.inherit.take() {
+                prototype.set_prototype_instance(proto);
+            } else {
+                prototype.set_prototype_instance(
+                    self.context
+                        .standard_objects()
+                        .object_object()
+                        .prototype()
+                        .into(),
+                );
+            }
         }
 
         self.constructor_object.clone().into()
