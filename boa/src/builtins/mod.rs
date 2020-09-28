@@ -79,12 +79,12 @@ impl<'context> ObjectBuilder<'context> {
                 .prototype()
                 .into(),
         );
-        function.insert_property("length", length.into(), Attribute::all());
-        function.insert_property("name", name.into(), Attribute::all());
+        function.insert_property("length", length, Attribute::all());
+        function.insert_property("name", name, Attribute::all());
 
         self.object
             .borrow_mut()
-            .insert_property(name, function.into(), Attribute::all());
+            .insert_property(name, function, Attribute::all());
         self
     }
 
@@ -171,12 +171,12 @@ impl<'context> ConstructorBuilder<'context> {
                 .prototype()
                 .into(),
         );
-        function.insert_property("length", length.into(), Attribute::all());
-        function.insert_property("name", name.into(), Attribute::all());
+        function.insert_property("length", length, Attribute::all());
+        function.insert_property("name", name, Attribute::all());
 
         self.prototype
             .borrow_mut()
-            .insert_property(name, function.into(), Attribute::all());
+            .insert_property(name, function, Attribute::all());
         self
     }
 
@@ -194,14 +194,12 @@ impl<'context> ConstructorBuilder<'context> {
                 .prototype()
                 .into(),
         );
-        function.insert_property("length", length.into(), Attribute::all());
-        function.insert_property("name", name.into(), Attribute::all());
+        function.insert_property("length", length, Attribute::all());
+        function.insert_property("name", name, Attribute::all());
 
-        self.constructor_object.borrow_mut().insert_property(
-            name,
-            function.into(),
-            Attribute::all(),
-        );
+        self.constructor_object
+            .borrow_mut()
+            .insert_property(name, function, Attribute::all());
         self
     }
 
@@ -290,14 +288,14 @@ impl<'context> ConstructorBuilder<'context> {
                     .into(),
             );
 
-            constructor.insert_property(PROTOTYPE, self.prototype.clone().into(), Attribute::all());
+            constructor.insert_property(PROTOTYPE, self.prototype.clone(), Attribute::all());
         }
 
         {
             let mut prototype = self.prototype.borrow_mut();
             prototype.insert_property(
                 "constructor",
-                self.constructor_object.clone().into(),
+                self.constructor_object.clone(),
                 Attribute::all(),
             );
 

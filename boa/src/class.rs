@@ -128,46 +128,55 @@ impl<'context> ClassBuilder<'context> {
     /// Add a method to the class.
     ///
     /// It is added to `prototype`.
-    pub fn method<N>(&mut self, name: N, length: usize, function: NativeFunction)
+    pub fn method<N>(&mut self, name: N, length: usize, function: NativeFunction) -> &mut Self
     where
         N: Into<String>,
     {
         // TODO: \/
         self.builder.method(function, &name.into(), length);
+        self
     }
 
     /// Add a static method to the class.
     ///
     /// It is added to class object itself.
-    pub fn static_method<N>(&mut self, name: N, length: usize, function: NativeFunction)
+    pub fn static_method<N>(
+        &mut self,
+        name: N,
+        length: usize,
+        function: NativeFunction,
+    ) -> &mut Self
     where
         N: Into<String>,
     {
         self.builder.static_method(function, &name.into(), length);
+        self
     }
 
     /// Add a property to the class, with the specified attribute.
     ///
     /// It is added to `prototype`.
     #[inline]
-    pub fn property<K, V>(&mut self, key: K, value: V, attribute: Attribute)
+    pub fn property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
     where
         K: Into<PropertyKey>,
         V: Into<Value>,
     {
         self.builder.property(key, value, attribute);
+        self
     }
 
     /// Add a static property to the class, with the specified attribute.
     ///
     /// It is added to class object itself.
     #[inline]
-    pub fn static_property<K, V>(&mut self, key: K, value: V, attribute: Attribute)
+    pub fn static_property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
     where
         K: Into<PropertyKey>,
         V: Into<Value>,
     {
         self.builder.static_property(key, value, attribute);
+        self
     }
 
     /// Return the current context.

@@ -366,19 +366,20 @@ impl Object {
     /// If a field was already in the object with the same name that a `Some` is returned
     /// with that field, otherwise None is retuned.
     #[inline]
-    pub(crate) fn insert_property<K>(
+    pub(crate) fn insert_property<K, V>(
         &mut self,
         key: K,
-        value: Value,
+        value: V,
         attribute: Attribute,
     ) -> Option<Property>
     where
         K: Into<PropertyKey>,
+        V: Into<Value>,
     {
         self.insert(
             key.into(),
             Property::data_descriptor(
-                value,
+                value.into(),
                 attribute
                     | Attribute::HAS_WRITABLE
                     | Attribute::HAS_ENUMERABLE

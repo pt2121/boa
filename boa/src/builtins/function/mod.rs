@@ -287,12 +287,12 @@ pub fn make_builtin_fn<N>(
             .get_field("Function")
             .get_field("prototype"),
     );
-    function.insert_property("length", Value::from(length), Attribute::all());
+    function.insert_property("length", length, Attribute::all());
 
     parent
         .as_object_mut()
         .unwrap()
-        .insert_property(name, Value::from(function), Attribute::all());
+        .insert_property(name, function, Attribute::all());
 }
 
 #[derive(Debug, Clone, Copy)]
