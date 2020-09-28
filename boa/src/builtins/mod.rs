@@ -113,25 +113,11 @@ pub struct ConstructorBuilder<'context> {
 
 impl<'context> ConstructorBuilder<'context> {
     pub fn new(context: &'context mut Context, constructor: NativeFunction) -> Self {
-        let prototype = GcObject::new(Object::create(
-            context
-                .standard_objects()
-                .object_object()
-                .prototype()
-                .into(),
-        ));
-        let constructor_object = GcObject::new(Object::create(
-            context
-                .standard_objects()
-                .function_object()
-                .prototype()
-                .into(),
-        ));
         Self {
             context,
             constrcutor_function: constructor,
-            constructor_object,
-            prototype,
+            constructor_object: GcObject::new(Object::default()),
+            prototype: GcObject::new(Object::default()),
             length: 0,
             name: "[Object]".to_string(),
             callable: true,
@@ -144,7 +130,7 @@ impl<'context> ConstructorBuilder<'context> {
         constructor: NativeFunction,
         object: StandardConstructor,
     ) -> Self {
-        let this = Self {
+        Self {
             context,
             constrcutor_function: constructor,
             constructor_object: object.constructor,
@@ -153,25 +139,7 @@ impl<'context> ConstructorBuilder<'context> {
             name: "[Object]".to_string(),
             callable: true,
             constructable: true,
-        };
-
-        this.prototype.borrow_mut().set_prototype_instance(
-            this.context
-                .standard_objects()
-                .object_object()
-                .prototype()
-                .into(),
-        );
-
-        this.constructor_object.borrow_mut().set_prototype_instance(
-            this.context
-                .standard_objects()
-                .function_object()
-                .prototype()
-                .into(),
-        );
-
-        this
+        }
     }
 
     pub fn method(&mut self, function: NativeFunction, name: &str, length: usize) -> &mut Self {
@@ -284,12 +252,27 @@ impl<'context> ConstructorBuilder<'context> {
             constructor.insert_property("length", length);
             constructor.insert_property("name", name);
 
+            constructor.set_prototype_instance(
+                self.context
+                    .standard_objects()
+                    .function_object()
+                    .prototype()
+                    .into(),
+            );
+
             constructor.insert_field(PROTOTYPE, self.prototype.clone().into());
         }
 
         {
             let mut prototype = self.prototype.borrow_mut();
             prototype.insert_field("constructor", self.constructor_object.clone().into());
+            prototype.set_prototype_instance(
+                self.context
+                    .standard_objects()
+                    .object_object()
+                    .prototype()
+                    .into(),
+            );
         }
 
         self.constructor_object.clone().into()
