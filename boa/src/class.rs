@@ -146,23 +146,27 @@ impl<'context> ClassBuilder<'context> {
             T::LENGTH.into(),
             Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT,
         );
-        constructor.insert_property("length", length);
+        constructor.insert("length", length);
 
         let name = Property::data_descriptor(
             T::NAME.into(),
             Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT,
         );
-        constructor.insert_property("name", name);
+        constructor.insert("name", name);
 
         let constructor = GcObject::new(constructor);
 
-        prototype
-            .borrow_mut()
-            .insert_field("constructor", constructor.clone().into());
+        prototype.borrow_mut().insert_property(
+            "constructor",
+            constructor.clone().into(),
+            Attribute::all(),
+        );
 
-        constructor
-            .borrow_mut()
-            .insert_field(PROTOTYPE, prototype.clone().into());
+        constructor.borrow_mut().insert_property(
+            PROTOTYPE,
+            prototype.clone().into(),
+            Attribute::all(),
+        );
 
         Self {
             context,
@@ -191,12 +195,12 @@ impl<'context> ClassBuilder<'context> {
                 .get_field("prototype"),
         );
 
-        function.insert_field("length", Value::from(length));
-        function.insert_field("name", Value::from(name.as_str()));
+        function.insert_property("length", Value::from(length), Attribute::all());
+        function.insert_property("name", Value::from(name.as_str()), Attribute::all());
 
         self.prototype
             .borrow_mut()
-            .insert_field(name, Value::from(function));
+            .insert_property(name, Value::from(function), Attribute::all());
     }
 
     /// Add a static method to the class.
@@ -215,12 +219,12 @@ impl<'context> ClassBuilder<'context> {
                 .get_field("prototype"),
         );
 
-        function.insert_field("length", Value::from(length));
-        function.insert_field("name", Value::from(name.as_str()));
+        function.insert_property("length", Value::from(length), Attribute::all());
+        function.insert_property("name", Value::from(name.as_str()), Attribute::all());
 
         self.object
             .borrow_mut()
-            .insert_field(name, Value::from(function));
+            .insert_property(name, Value::from(function), Attribute::all());
     }
 
     /// Add a property to the class, with the specified attribute.
@@ -235,9 +239,7 @@ impl<'context> ClassBuilder<'context> {
         // We bitwise or (`|`) with `Attribute::default()` (`READONLY | NON_ENUMERABLE | PERMANENT`)
         // so we dont get an empty attribute.
         let property = Property::data_descriptor(value.into(), attribute | Attribute::default());
-        self.prototype
-            .borrow_mut()
-            .insert_property(key.into(), property);
+        self.prototype.borrow_mut().insert(key.into(), property);
     }
 
     /// Add a static property to the class, with the specified attribute.
@@ -252,9 +254,7 @@ impl<'context> ClassBuilder<'context> {
         // We bitwise or (`|`) with `Attribute::default()` (`READONLY | NON_ENUMERABLE | PERMANENT`)
         // so we dont get an empty attribute.
         let property = Property::data_descriptor(value.into(), attribute | Attribute::default());
-        self.object
-            .borrow_mut()
-            .insert_property(key.into(), property);
+        self.object.borrow_mut().insert(key.into(), property);
     }
 
     /// Return the current context.

@@ -75,10 +75,12 @@ impl<'context> ObjectBuilder<'context> {
                 .prototype()
                 .into(),
         );
-        function.insert_field("length", length.into());
-        function.insert_field("name", name.into());
+        function.insert_property("length", length.into(), Attribute::all());
+        function.insert_property("name", name.into(), Attribute::all());
 
-        self.object.borrow_mut().insert_field(name, function.into());
+        self.object
+            .borrow_mut()
+            .insert_property(name, function.into(), Attribute::all());
         self
     }
 
@@ -88,7 +90,7 @@ impl<'context> ObjectBuilder<'context> {
         V: Into<Value>,
     {
         let property = Property::data_descriptor(value.into(), attribute);
-        self.object.borrow_mut().insert_property(key, property);
+        self.object.borrow_mut().insert(key, property);
         self
     }
 
@@ -154,12 +156,12 @@ impl<'context> ConstructorBuilder<'context> {
                 .prototype()
                 .into(),
         );
-        function.insert_field("length", length.into());
-        function.insert_field("name", name.into());
+        function.insert_property("length", length.into(), Attribute::all());
+        function.insert_property("name", name.into(), Attribute::all());
 
         self.prototype
             .borrow_mut()
-            .insert_field(name, function.into());
+            .insert_property(name, function.into(), Attribute::all());
         self
     }
 
@@ -177,12 +179,14 @@ impl<'context> ConstructorBuilder<'context> {
                 .prototype()
                 .into(),
         );
-        function.insert_field("length", length.into());
-        function.insert_field("name", name.into());
+        function.insert_property("length", length.into(), Attribute::all());
+        function.insert_property("name", name.into(), Attribute::all());
 
-        self.constructor_object
-            .borrow_mut()
-            .insert_field(name, function.into());
+        self.constructor_object.borrow_mut().insert_property(
+            name,
+            function.into(),
+            Attribute::all(),
+        );
         self
     }
 
@@ -192,7 +196,7 @@ impl<'context> ConstructorBuilder<'context> {
         V: Into<Value>,
     {
         let property = Property::data_descriptor(value.into(), attribute);
-        self.prototype.borrow_mut().insert_property(key, property);
+        self.prototype.borrow_mut().insert(key, property);
         self
     }
 
@@ -202,9 +206,7 @@ impl<'context> ConstructorBuilder<'context> {
         V: Into<Value>,
     {
         let property = Property::data_descriptor(value.into(), attribute);
-        self.constructor_object
-            .borrow_mut()
-            .insert_property(key, property);
+        self.constructor_object.borrow_mut().insert(key, property);
         self
     }
 
@@ -258,8 +260,8 @@ impl<'context> ConstructorBuilder<'context> {
         {
             let mut constructor = self.constructor_object.borrow_mut();
             constructor.data = ObjectData::Function(function);
-            constructor.insert_property("length", length);
-            constructor.insert_property("name", name);
+            constructor.insert("length", length);
+            constructor.insert("name", name);
 
             constructor.set_prototype_instance(
                 self.context
@@ -269,12 +271,16 @@ impl<'context> ConstructorBuilder<'context> {
                     .into(),
             );
 
-            constructor.insert_field(PROTOTYPE, self.prototype.clone().into());
+            constructor.insert_property(PROTOTYPE, self.prototype.clone().into(), Attribute::all());
         }
 
         {
             let mut prototype = self.prototype.borrow_mut();
-            prototype.insert_field("constructor", self.constructor_object.clone().into());
+            prototype.insert_property(
+                "constructor",
+                self.constructor_object.clone().into(),
+                Attribute::all(),
+            );
 
             if let Some(proto) = self.inherit.take() {
                 prototype.set_prototype_instance(proto);
@@ -342,6 +348,6 @@ pub fn init(context: &mut Context) {
     for init in &globals2 {
         let (name, value, attribute) = init(context);
         let property = Property::data_descriptor(value, attribute);
-        global_object.borrow_mut().insert_property(name, property);
+        global_object.borrow_mut().insert(name, property);
     }
 }

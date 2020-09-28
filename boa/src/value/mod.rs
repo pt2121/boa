@@ -472,7 +472,7 @@ impl Value {
         let _timer = BoaProfiler::global().start_event("Value::update_property", "value");
 
         if let Some(ref mut object) = self.as_object_mut() {
-            object.insert_property(field, new_property);
+            object.insert(field, new_property);
         }
     }
 
@@ -558,7 +558,7 @@ impl Value {
         K: Into<PropertyKey>,
     {
         if let Some(mut object) = self.as_object_mut() {
-            object.insert_property(key.into(), property.clone());
+            object.insert(key.into(), property.clone());
         }
         property
     }

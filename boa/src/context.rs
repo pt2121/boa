@@ -585,7 +585,7 @@ impl Context {
         self.global_object()
             .as_object_mut()
             .unwrap()
-            .insert_property(T::NAME, property);
+            .insert(T::NAME, property);
         Ok(())
     }
 

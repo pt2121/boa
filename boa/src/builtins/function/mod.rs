@@ -188,7 +188,7 @@ pub fn create_unmapped_arguments_object(arguments_list: &[Value]) -> Value {
             Attribute::WRITABLE | Attribute::ENUMERABLE | Attribute::CONFIGURABLE,
         );
 
-        obj.insert_property(index, prop);
+        obj.insert(index, prop);
         index += 1;
     }
 
@@ -226,25 +226,26 @@ pub fn make_constructor_fn(
         length.into(),
         Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT,
     );
-    constructor.insert_property("length", length);
+    constructor.insert("length", length);
 
     let name = Property::data_descriptor(
         name.into(),
         Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT,
     );
-    constructor.insert_property("name", name);
+    constructor.insert("name", name);
 
     let constructor = Value::from(constructor);
 
-    prototype
-        .as_object_mut()
-        .unwrap()
-        .insert_field("constructor", constructor.clone());
+    prototype.as_object_mut().unwrap().insert_property(
+        "constructor",
+        constructor.clone(),
+        Attribute::all(),
+    );
 
     constructor
         .as_object_mut()
         .expect("constructor object")
-        .insert_field(PROTOTYPE, prototype);
+        .insert_property(PROTOTYPE, prototype, Attribute::all());
 
     constructor
 }
@@ -286,12 +287,12 @@ pub fn make_builtin_fn<N>(
             .get_field("Function")
             .get_field("prototype"),
     );
-    function.insert_field("length", Value::from(length));
+    function.insert_property("length", Value::from(length), Attribute::all());
 
     parent
         .as_object_mut()
         .unwrap()
-        .insert_field(name, Value::from(function));
+        .insert_property(name, Value::from(function), Attribute::all());
 }
 
 #[derive(Debug, Clone, Copy)]
