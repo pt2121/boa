@@ -509,8 +509,8 @@ impl<'context> ObjectBuilder<'context> {
         self
     }
 
-    pub fn build(&mut self) -> Value {
-        self.object.clone().into()
+    pub fn build(&mut self) -> GcObject {
+        self.object.clone()
     }
 }
 

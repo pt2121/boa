@@ -33,12 +33,13 @@ impl BuiltIn for Json {
 
     fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
-        let mut builder = ObjectBuilder::new(context);
 
-        builder.static_method(Self::parse, "parse", 2);
-        builder.static_method(Self::stringify, "stringify", 3);
+        let json_object = ObjectBuilder::new(context)
+            .static_method(Self::parse, "parse", 2)
+            .static_method(Self::stringify, "stringify", 3)
+            .build();
 
-        (Self::NAME, builder.build(), Self::attribute())
+        (Self::NAME, json_object.into(), Self::attribute())
     }
 }
 

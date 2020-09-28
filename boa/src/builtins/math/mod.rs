@@ -77,7 +77,7 @@ impl BuiltIn for Math {
             .static_method(Self::trunc, "trunc", 1)
             .build();
 
-        (Self::NAME, object, Self::attribute())
+        (Self::NAME, object.into(), Self::attribute())
     }
 }
 

@@ -165,7 +165,7 @@ impl BuiltIn for Console {
             .static_method(Self::dir, "dirxml", 0)
             .build();
 
-        (Self::NAME, console, Self::attribute())
+        (Self::NAME, console.into(), Self::attribute())
     }
 }
 
