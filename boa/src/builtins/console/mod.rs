@@ -141,6 +141,10 @@ pub(crate) struct Console {
 impl BuiltIn for Console {
     const NAME: &'static str = "console";
 
+    fn attribute() -> Attribute {
+        Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE
+    }
+
     fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
         let console = ObjectBuilder::new(context)

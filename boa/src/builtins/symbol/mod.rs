@@ -236,6 +236,10 @@ impl Symbol {
 impl BuiltIn for Symbol {
     const NAME: &'static str = "Symbol";
 
+    fn attribute() -> Attribute {
+        Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE
+    }
+
     fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         // https://tc39.es/ecma262/#sec-well-known-symbols
         let well_known_symbols = context.well_known_symbols();

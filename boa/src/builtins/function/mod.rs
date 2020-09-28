@@ -313,6 +313,10 @@ impl BuiltInFunctionObject {
 impl BuiltIn for BuiltInFunctionObject {
     const NAME: &'static str = "Function";
 
+    fn attribute() -> Attribute {
+        Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE
+    }
+
     fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event("function", "init");
 

@@ -50,9 +50,7 @@ pub trait BuiltIn {
     /// The binding name of the property.
     const NAME: &'static str;
 
-    fn attribute() -> Attribute {
-        Attribute::all()
-    }
+    fn attribute() -> Attribute;
     fn init(context: &mut Context) -> (&'static str, Value, Attribute);
 }
 

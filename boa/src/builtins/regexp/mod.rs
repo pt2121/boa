@@ -63,6 +63,10 @@ unsafe impl Trace for RegExp {
 impl BuiltIn for RegExp {
     const NAME: &'static str = "RegExp";
 
+    fn attribute() -> Attribute {
+        Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE
+    }
+
     fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
 

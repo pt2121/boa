@@ -4,6 +4,7 @@ mod tests;
 use crate::{
     builtins::BuiltIn,
     object::{ConstructorBuilder, ObjectData},
+    property::Attribute,
     value::{PreferredType, Value},
     BoaProfiler, Context, Result,
 };
@@ -107,7 +108,11 @@ impl Default for Date {
 impl BuiltIn for Date {
     const NAME: &'static str = "Date";
 
-    fn init(context: &mut Context) -> (&'static str, Value, crate::property::Attribute) {
+    fn attribute() -> Attribute {
+        Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE
+    }
+
+    fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
 
         let date_object = ConstructorBuilder::new(context, Self::constructor)

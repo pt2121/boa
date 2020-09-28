@@ -21,7 +21,10 @@ pub(crate) struct Infinity;
 impl BuiltIn for Infinity {
     const NAME: &'static str = "Infinity";
 
-    /// Initialize the `Infinity` property on the global object.
+    fn attribute() -> Attribute {
+        Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT
+    }
+
     fn init(_context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
 

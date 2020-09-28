@@ -22,6 +22,10 @@ pub(crate) struct NaN;
 impl BuiltIn for NaN {
     const NAME: &'static str = "NaN";
 
+    fn attribute() -> Attribute {
+        Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT
+    }
+
     fn init(_context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
 
