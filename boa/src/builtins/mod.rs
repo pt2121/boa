@@ -46,7 +46,7 @@ use crate::{
     Context, Value,
 };
 
-pub trait BuiltIn {
+pub(crate) trait BuiltIn {
     /// The binding name of the property.
     const NAME: &'static str;
 

@@ -146,9 +146,9 @@ impl StandardObjects {
 
 /// Javascript context. It is the primary way to interact with the runtime.
 ///
-/// For each `Context` instance a new instance of runtime is created.
-/// It means that it is safe to use different contexts in different threads,
-/// but each `Context` instance must be used only from a single thread.
+/// `Context`s constructed in a thread share the same runtime, therefore it
+/// is possible to share objects from one context to another context, but they
+/// have to in the same thread.
 #[derive(Debug)]
 pub struct Context {
     /// realm holds both the global object and the environment

@@ -53,6 +53,7 @@ use std::result::Result as StdResult;
 pub(crate) use crate::{exec::Executable, profiler::BoaProfiler};
 
 // Export things to root level
+#[doc(inline)]
 pub use crate::{context::Context, value::Value};
 
 use crate::syntax::{
