@@ -39,8 +39,8 @@ impl BuiltIn for Json {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
 
         let json_object = ObjectBuilder::new(context)
-            .static_method(Self::parse, "parse", 2)
-            .static_method(Self::stringify, "stringify", 3)
+            .function(Self::parse, "parse", 2)
+            .function(Self::stringify, "stringify", 3)
             .build();
 
         (Self::NAME, json_object.into(), Self::attribute())

@@ -476,12 +476,7 @@ impl<'context> ObjectBuilder<'context> {
         Self { context, object }
     }
 
-    pub fn static_method(
-        &mut self,
-        function: NativeFunction,
-        name: &str,
-        length: usize,
-    ) -> &mut Self {
+    pub fn function(&mut self, function: NativeFunction, name: &str, length: usize) -> &mut Self {
         let mut function = Object::function(
             Function::BuiltIn(function.into(), FunctionFlags::CALLABLE),
             self.context
@@ -502,7 +497,7 @@ impl<'context> ObjectBuilder<'context> {
         self
     }
 
-    pub fn static_property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
+    pub fn property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
     where
         K: Into<PropertyKey>,
         V: Into<Value>,
