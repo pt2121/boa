@@ -464,6 +464,28 @@ impl Object {
     }
 }
 
+/// Builder for creating objects with properties.
+///
+/// # Examples
+///
+/// ```
+/// # use boa::{Context, object::ObjectBuilder, Attribute};
+/// let mut context = Context::new();
+/// let object = ObjectBuilder::new(context)
+///     .property("hello", "world", Attribute::all())
+///     .property(1, 1 Attribute::all())
+///     .function(|_, _, _| Ok(Value::undefined()), "func", 0)
+///     .build();
+/// ```
+///
+/// The equivalent in JavaScript would be:
+/// ```text
+/// let object = {
+///     hello: "world",
+///     "1": 1,
+///     func: function() {}
+/// }
+/// ```
 #[derive(Debug)]
 pub struct ObjectBuilder<'context> {
     context: &'context mut Context,
@@ -471,11 +493,13 @@ pub struct ObjectBuilder<'context> {
 }
 
 impl<'context> ObjectBuilder<'context> {
+    /// Create a new `ObjectBuilder`.
     pub fn new(context: &'context mut Context) -> Self {
         let object = context.construct_object();
         Self { context, object }
     }
 
+    /// Add a function to the object.
     pub fn function(&mut self, function: NativeFunction, name: &str, length: usize) -> &mut Self {
         let mut function = Object::function(
             Function::BuiltIn(function.into(), FunctionFlags::CALLABLE),
@@ -497,6 +521,7 @@ impl<'context> ObjectBuilder<'context> {
         self
     }
 
+    /// Add a property to the object.
     pub fn property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
     where
         K: Into<PropertyKey>,
@@ -507,11 +532,13 @@ impl<'context> ObjectBuilder<'context> {
         self
     }
 
+    /// Build the object.
     pub fn build(&mut self) -> GcObject {
         self.object.clone()
     }
 }
 
+/// Builder for creating constructors objects, like `Array`.
 pub struct ConstructorBuilder<'context> {
     context: &'context mut Context,
     constrcutor_function: NativeFunction,
@@ -539,6 +566,7 @@ impl Debug for ConstructorBuilder<'_> {
 }
 
 impl<'context> ConstructorBuilder<'context> {
+    /// Create a new `ConstructorBuilder`.
     pub fn new(context: &'context mut Context, constructor: NativeFunction) -> Self {
         Self {
             context,
@@ -571,6 +599,7 @@ impl<'context> ConstructorBuilder<'context> {
         }
     }
 
+    /// Add new method to the constructors prototype.
     pub fn method(&mut self, function: NativeFunction, name: &str, length: usize) -> &mut Self {
         let mut function = Object::function(
             Function::BuiltIn(function.into(), FunctionFlags::CALLABLE),
@@ -592,6 +621,7 @@ impl<'context> ConstructorBuilder<'context> {
         self
     }
 
+    /// Add new static method to the constructors object itself.
     pub fn static_method(
         &mut self,
         function: NativeFunction,
@@ -618,6 +648,7 @@ impl<'context> ConstructorBuilder<'context> {
         self
     }
 
+    /// Add new property to the constructors prototype.
     pub fn property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
     where
         K: Into<PropertyKey>,
@@ -628,6 +659,7 @@ impl<'context> ConstructorBuilder<'context> {
         self
     }
 
+    /// Add new static property to the constructors object itself.
     pub fn static_property<K, V>(&mut self, key: K, value: V, attribute: Attribute) -> &mut Self
     where
         K: Into<PropertyKey>,
@@ -638,11 +670,17 @@ impl<'context> ConstructorBuilder<'context> {
         self
     }
 
+    /// Specify how many arguments the constructor function takes.
+    ///
+    /// Default is `0`.
     pub fn length(&mut self, length: usize) -> &mut Self {
         self.length = length;
         self
     }
 
+    /// Specify the name of the constructor function.
+    ///
+    /// Default is `"[object]"`
     pub fn name<N>(&mut self, name: N) -> &mut Self
     where
         N: Into<String>,
@@ -651,26 +689,37 @@ impl<'context> ConstructorBuilder<'context> {
         self
     }
 
+    /// Specify whether the constructor function can be called.
+    ///
+    /// Default is `true`
     pub fn callable(&mut self, callable: bool) -> &mut Self {
         self.callable = callable;
         self
     }
 
+    /// Specify whether the constructor function can be called with `new` keyword.
+    ///
+    /// Default is `true`
     pub fn constructable(&mut self, constructable: bool) -> &mut Self {
         self.constructable = constructable;
         self
     }
 
+    /// Specify the prototype this constructor object inherits from.
+    ///
+    /// Default is `Object.prototype`
     pub fn inherit(&mut self, prototype: Value) -> &mut Self {
         assert!(prototype.is_object() || prototype.is_null());
         self.inherit = Some(prototype);
         self
     }
 
+    /// Return the current context.
     pub fn context(&mut self) -> &'_ mut Context {
         self.context
     }
 
+    /// Build the constructor function object.
     pub fn build(&mut self) -> GcObject {
         // Create the native function
         let function = Function::BuiltIn(
