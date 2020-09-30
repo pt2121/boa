@@ -27,6 +27,7 @@ use crate::{
 };
 use std::result::Result as StdResult;
 
+/// Store a builtin constructor (such as `Object`) and its corresponding prototype.
 #[derive(Debug, Clone)]
 pub struct StandardConstructor {
     pub(crate) constructor: GcObject,
@@ -54,6 +55,7 @@ impl StandardConstructor {
     }
 }
 
+/// Cached core standard objects.
 #[derive(Debug, Clone, Default)]
 pub struct StandardObjects {
     object: StandardConstructor,
@@ -639,6 +641,7 @@ impl Context {
         &self.well_known_symbols
     }
 
+    /// Return the core standard objects.
     #[inline]
     pub fn standard_objects(&self) -> &StandardObjects {
         &self.standard_objects
