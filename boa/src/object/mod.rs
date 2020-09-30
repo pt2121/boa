@@ -490,12 +490,15 @@ impl<'context> ObjectBuilder<'context> {
                 .prototype()
                 .into(),
         );
-        function.insert_property("length", length, Attribute::all());
-        function.insert_property("name", name, Attribute::all());
+        let attribute = Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT;
+        function.insert_property("length", length, attribute);
+        function.insert_property("name", name, attribute);
 
-        self.object
-            .borrow_mut()
-            .insert_property(name, function, Attribute::all());
+        self.object.borrow_mut().insert_property(
+            name,
+            function,
+            Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE,
+        );
         self
     }
 
@@ -519,7 +522,7 @@ pub struct ConstructorBuilder<'context> {
     constrcutor_function: NativeFunction,
     constructor_object: GcObject,
     prototype: GcObject,
-    name: String,
+    name: Option<String>,
     length: usize,
     callable: bool,
     constructable: bool,
@@ -548,7 +551,7 @@ impl<'context> ConstructorBuilder<'context> {
             constructor_object: GcObject::new(Object::default()),
             prototype: GcObject::new(Object::default()),
             length: 0,
-            name: "[Object]".to_string(),
+            name: None,
             callable: true,
             constructable: true,
             inherit: None,
@@ -566,7 +569,7 @@ impl<'context> ConstructorBuilder<'context> {
             constructor_object: object.constructor,
             prototype: object.prototype,
             length: 0,
-            name: "[Object]".to_string(),
+            name: None,
             callable: true,
             constructable: true,
             inherit: None,
@@ -582,12 +585,15 @@ impl<'context> ConstructorBuilder<'context> {
                 .prototype()
                 .into(),
         );
-        function.insert_property("length", length, Attribute::all());
-        function.insert_property("name", name, Attribute::all());
+        let attribute = Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT;
+        function.insert_property("length", length, attribute);
+        function.insert_property("name", name, attribute);
 
-        self.prototype
-            .borrow_mut()
-            .insert_property(name, function, Attribute::all());
+        self.prototype.borrow_mut().insert_property(
+            name,
+            function,
+            Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE,
+        );
         self
     }
 
@@ -605,12 +611,15 @@ impl<'context> ConstructorBuilder<'context> {
                 .prototype()
                 .into(),
         );
-        function.insert_property("length", length, Attribute::all());
-        function.insert_property("name", name, Attribute::all());
+        let attribute = Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT;
+        function.insert_property("length", length, attribute);
+        function.insert_property("name", name, attribute);
 
-        self.constructor_object
-            .borrow_mut()
-            .insert_property(name, function, Attribute::all());
+        self.constructor_object.borrow_mut().insert_property(
+            name,
+            function,
+            Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE,
+        );
         self
     }
 
@@ -643,7 +652,7 @@ impl<'context> ConstructorBuilder<'context> {
     where
         N: Into<String>,
     {
-        self.name = name.into();
+        self.name = Some(name.into());
         self
     }
 
@@ -678,10 +687,11 @@ impl<'context> ConstructorBuilder<'context> {
             self.length.into(),
             Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT,
         );
-        let mut name = String::new();
-        std::mem::swap(&mut self.name, &mut name);
         let name = Property::data_descriptor(
-            name.into(),
+            self.name
+                .take()
+                .unwrap_or_else(|| String::from("[object]"))
+                .into(),
             Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT,
         );
 
@@ -699,7 +709,11 @@ impl<'context> ConstructorBuilder<'context> {
                     .into(),
             );
 
-            constructor.insert_property(PROTOTYPE, self.prototype.clone(), Attribute::all());
+            constructor.insert_property(
+                PROTOTYPE,
+                self.prototype.clone(),
+                Attribute::READONLY | Attribute::NON_ENUMERABLE | Attribute::PERMANENT,
+            );
         }
 
         {
@@ -707,7 +721,7 @@ impl<'context> ConstructorBuilder<'context> {
             prototype.insert_property(
                 "constructor",
                 self.constructor_object.clone(),
-                Attribute::all(),
+                Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE,
             );
 
             if let Some(proto) = self.inherit.take() {
