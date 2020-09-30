@@ -15,7 +15,7 @@
 
 use crate::{
     builtins::BuiltIn,
-    object::ObjectBuilder,
+    object::ObjectInitializer,
     property::{Attribute, Property, PropertyKey},
     BoaProfiler, Context, Result, Value,
 };
@@ -38,7 +38,7 @@ impl BuiltIn for Json {
     fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
 
-        let json_object = ObjectBuilder::new(context)
+        let json_object = ObjectInitializer::new(context)
             .function(Self::parse, "parse", 2)
             .function(Self::stringify, "stringify", 3)
             .build();

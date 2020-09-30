@@ -18,7 +18,7 @@ mod tests;
 
 use crate::{
     builtins::BuiltIn,
-    object::ObjectBuilder,
+    object::ObjectInitializer,
     property::Attribute,
     value::{display_obj, RcString, Value},
     BoaProfiler, Context, Result,
@@ -147,7 +147,7 @@ impl BuiltIn for Console {
 
     fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
-        let console = ObjectBuilder::new(context)
+        let console = ObjectInitializer::new(context)
             .function(Self::assert, "assert", 0)
             .function(Self::clear, "clear", 0)
             .function(Self::debug, "debug", 0)

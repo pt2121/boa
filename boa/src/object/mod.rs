@@ -487,12 +487,12 @@ impl Object {
 /// }
 /// ```
 #[derive(Debug)]
-pub struct ObjectBuilder<'context> {
+pub struct ObjectInitializer<'context> {
     context: &'context mut Context,
     object: GcObject,
 }
 
-impl<'context> ObjectBuilder<'context> {
+impl<'context> ObjectInitializer<'context> {
     /// Create a new `ObjectBuilder`.
     pub fn new(context: &'context mut Context) -> Self {
         let object = context.construct_object();
