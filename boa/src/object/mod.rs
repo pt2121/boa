@@ -469,11 +469,11 @@ impl Object {
 /// # Examples
 ///
 /// ```
-/// # use boa::{Context, object::ObjectBuilder, Attribute};
+/// # use boa::{Context, Value, object::ObjectInitializer, property::Attribute};
 /// let mut context = Context::new();
-/// let object = ObjectBuilder::new(context)
+/// let object = ObjectInitializer::new(&mut context)
 ///     .property("hello", "world", Attribute::all())
-///     .property(1, 1 Attribute::all())
+///     .property(1, 1, Attribute::all())
 ///     .function(|_, _, _| Ok(Value::undefined()), "func", 0)
 ///     .build();
 /// ```
