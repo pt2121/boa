@@ -44,11 +44,17 @@ impl Default for StandardConstructor {
 }
 
 impl StandardConstructor {
+    /// Return the constructor object.
+    ///
+    /// This is the same as `Object`, `Array`, etc.
     #[inline]
     pub fn constructor(&self) -> GcObject {
         self.constructor.clone()
     }
 
+    /// Return the prototype of the constructor object.
+    ///
+    /// This is the same as `Object.prototype`, `Array.prototype`, etc
     #[inline]
     pub fn prototype(&self) -> GcObject {
         self.prototype.clone()
@@ -150,7 +156,7 @@ impl StandardObjects {
 ///
 /// `Context`s constructed in a thread share the same runtime, therefore it
 /// is possible to share objects from one context to another context, but they
-/// have to in the same thread.
+/// have to be in the same thread.
 #[derive(Debug)]
 pub struct Context {
     /// realm holds both the global object and the environment

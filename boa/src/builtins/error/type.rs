@@ -38,7 +38,7 @@ impl BuiltIn for TypeError {
 
         let error_prototype = context.standard_objects().error_object().prototype();
         let attribute = Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE;
-        let range_error_object = ConstructorBuilder::with_standard_object(
+        let type_error_object = ConstructorBuilder::with_standard_object(
             context,
             Self::constructor,
             context.standard_objects().type_error_object().clone(),
@@ -50,7 +50,7 @@ impl BuiltIn for TypeError {
         .property("message", "", attribute)
         .build();
 
-        (Self::NAME, range_error_object.into(), Self::attribute())
+        (Self::NAME, type_error_object.into(), Self::attribute())
     }
 }
 

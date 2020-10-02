@@ -46,14 +46,11 @@ impl Map {
 
     /// Create a new map
     pub(crate) fn constructor(this: &Value, args: &[Value], ctx: &mut Context) -> Result<Value> {
-        // Make a new Object which will internally represent the Array (mapping
-        // between indices and values): this creates an Object with no prototype
-
         // Set Prototype
         let prototype = ctx.global_object().get_field("Map").get_field(PROTOTYPE);
 
         this.as_object_mut()
-            .expect("this is array object")
+            .expect("this is map object")
             .set_prototype_instance(prototype);
         // This value is used by console.log and other routines to match Object type
         // to its Javascript Identifier (global constructor method name)

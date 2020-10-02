@@ -35,7 +35,7 @@ impl BuiltIn for SyntaxError {
 
         let error_prototype = context.standard_objects().error_object().prototype();
         let attribute = Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE;
-        let range_error_object = ConstructorBuilder::with_standard_object(
+        let syntax_error_object = ConstructorBuilder::with_standard_object(
             context,
             Self::constructor,
             context.standard_objects().syntax_error_object().clone(),
@@ -47,7 +47,7 @@ impl BuiltIn for SyntaxError {
         .property("message", "", attribute)
         .build();
 
-        (Self::NAME, range_error_object.into(), Self::attribute())
+        (Self::NAME, syntax_error_object.into(), Self::attribute())
     }
 }
 

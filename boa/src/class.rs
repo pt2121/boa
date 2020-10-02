@@ -130,10 +130,9 @@ impl<'context> ClassBuilder<'context> {
     /// It is added to `prototype`.
     pub fn method<N>(&mut self, name: N, length: usize, function: NativeFunction) -> &mut Self
     where
-        N: Into<String>,
+        N: AsRef<str>,
     {
-        // TODO: \/
-        self.builder.method(function, &name.into(), length);
+        self.builder.method(function, name.as_ref(), length);
         self
     }
 
@@ -147,9 +146,9 @@ impl<'context> ClassBuilder<'context> {
         function: NativeFunction,
     ) -> &mut Self
     where
-        N: Into<String>,
+        N: AsRef<str>,
     {
-        self.builder.static_method(function, &name.into(), length);
+        self.builder.static_method(function, name.as_ref(), length);
         self
     }
 

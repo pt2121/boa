@@ -57,7 +57,7 @@ pub(crate) trait BuiltIn {
 /// Initializes builtin objects and functions
 #[inline]
 pub fn init(context: &mut Context) {
-    let globals2 = [
+    let globals = [
         // Global properties.
         Undefined::init,
         Infinity::init,
@@ -90,7 +90,7 @@ pub fn init(context: &mut Context) {
         unreachable!("global object should always be an object")
     };
 
-    for init in &globals2 {
+    for init in &globals {
         let (name, value, attribute) = init(context);
         let property = Property::data_descriptor(value, attribute);
         global_object.borrow_mut().insert(name, property);
