@@ -36,6 +36,7 @@ impl BuiltIn for TypeError {
     fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
 
+        let error_prototype = context.standard_objects().error_object().prototype();
         let attribute = Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE;
         let range_error_object = ConstructorBuilder::with_standard_object(
             context,
@@ -44,9 +45,9 @@ impl BuiltIn for TypeError {
         )
         .name(Self::NAME)
         .length(Self::LENGTH)
+        .inherit(error_prototype.into())
         .property("name", Self::NAME, attribute)
         .property("message", "", attribute)
-        .method(Self::to_string, "toString", 0)
         .build();
 
         (Self::NAME, range_error_object.into(), Self::attribute())
@@ -67,23 +68,5 @@ impl TypeError {
         // to its Javascript Identifier (global constructor method name)
         this.set_data(ObjectData::Error);
         Err(this.clone())
-    }
-
-    /// `Error.prototype.toString()`
-    ///
-    /// The toString() method returns a string representing the specified Error object.
-    ///
-    /// More information:
-    ///  - [MDN documentation][mdn]
-    ///  - [ECMAScript reference][spec]
-    ///
-    /// [spec]: https://tc39.es/ecma262/#sec-error.prototype.tostring
-    /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/toString
-    #[allow(clippy::wrong_self_convention)]
-    pub(crate) fn to_string(this: &Value, _: &[Value], ctx: &mut Context) -> Result<Value> {
-        let name = this.get_field("name").to_string(ctx)?;
-        let message = this.get_field("message").to_string(ctx)?;
-
-        Ok(Value::from(format!("{}: {}", name, message)))
     }
 }

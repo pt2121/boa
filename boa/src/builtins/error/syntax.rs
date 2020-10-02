@@ -33,6 +33,7 @@ impl BuiltIn for SyntaxError {
     fn init(context: &mut Context) -> (&'static str, Value, Attribute) {
         let _timer = BoaProfiler::global().start_event(Self::NAME, "init");
 
+        let error_prototype = context.standard_objects().error_object().prototype();
         let attribute = Attribute::WRITABLE | Attribute::NON_ENUMERABLE | Attribute::CONFIGURABLE;
         let range_error_object = ConstructorBuilder::with_standard_object(
             context,
@@ -41,9 +42,9 @@ impl BuiltIn for SyntaxError {
         )
         .name(Self::NAME)
         .length(Self::LENGTH)
+        .inherit(error_prototype.into())
         .property("name", Self::NAME, attribute)
         .property("message", "", attribute)
-        .method(Self::to_string, "toString", 0)
         .build();
 
         (Self::NAME, range_error_object.into(), Self::attribute())
@@ -64,23 +65,5 @@ impl SyntaxError {
         // to its Javascript Identifier (global constructor method name)
         this.set_data(ObjectData::Error);
         Err(this.clone())
-    }
-
-    /// `Error.prototype.toString()`
-    ///
-    /// The toString() method returns a string representing the specified Error object.
-    ///
-    /// More information:
-    ///  - [MDN documentation][mdn]
-    ///  - [ECMAScript reference][spec]
-    ///
-    /// [spec]: https://tc39.es/ecma262/#sec-error.prototype.tostring
-    /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/toString
-    #[allow(clippy::wrong_self_convention)]
-    pub(crate) fn to_string(this: &Value, _: &[Value], _: &mut Context) -> Result<Value> {
-        let name = this.get_field("name");
-        let message = this.get_field("message");
-        // FIXME: This should not use `.display()`
-        Ok(format!("{}: {}", name.display(), message.display()).into())
     }
 }

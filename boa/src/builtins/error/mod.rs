@@ -92,13 +92,9 @@ impl Error {
     /// [spec]: https://tc39.es/ecma262/#sec-error.prototype.tostring
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/toString
     #[allow(clippy::wrong_self_convention)]
-    pub(crate) fn to_string(this: &Value, _: &[Value], _: &mut Context) -> Result<Value> {
-        let name = this.get_field("name");
-        let message = this.get_field("message");
-        Ok(Value::from(format!(
-            "{}: {}",
-            name.display(),
-            message.display()
-        )))
+    pub(crate) fn to_string(this: &Value, _: &[Value], context: &mut Context) -> Result<Value> {
+        let name = this.get_field("name").to_string(context)?;
+        let message = this.get_field("message").to_string(context)?;
+        Ok(format!("{}: {}", name, message).into())
     }
 }
