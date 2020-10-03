@@ -333,9 +333,10 @@ impl String {
 
         let arg = args
             .get(0)
-            .expect("failed to get argument for String method");
+            .cloned()
+            .unwrap_or_else(Value::undefined);
 
-        if Self::is_regex_string(arg) {
+        if Self::is_regexp_object(&arg) {
             ctx.throw_type_error(
                 "First argument to String.prototype.startsWith must not be a regular expression",
             )?;
@@ -382,9 +383,10 @@ impl String {
 
         let arg = args
             .get(0)
-            .expect("failed to get argument for String method");
+            .cloned()
+            .unwrap_or_else(Value::undefined);
 
-        if Self::is_regex_string(arg) {
+        if Self::is_regexp_object(&arg) {
             ctx.throw_type_error(
                 "First argument to String.prototype.endsWith must not be a regular expression",
             )?;
@@ -435,9 +437,10 @@ impl String {
 
         let arg = args
             .get(0)
-            .expect("failed to get argument for String method");
+            .cloned()
+            .unwrap_or_else(Value::undefined);
 
-        if Self::is_regex_string(arg) {
+        if Self::is_regexp_object(&arg) {
             ctx.throw_type_error(
                 "First argument to String.prototype.includes must not be a regular expression",
             )?;
@@ -481,7 +484,7 @@ impl String {
         }
     }
 
-    fn is_regex_string(value: &Value) -> bool {
+    fn is_regexp_object(value: &Value) -> bool {
         match value {
             Value::Object(ref obj) => obj.borrow().is_regexp(),
             _ => false,
