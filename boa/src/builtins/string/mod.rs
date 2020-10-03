@@ -331,11 +331,17 @@ impl String {
         // Then we convert it into a Rust String by wrapping it in from_value
         let primitive_val = this.to_string(ctx)?;
 
-        // TODO: Should throw TypeError if pattern is regular expression
-        let search_string = args
+        let arg = args
             .get(0)
-            .expect("failed to get argument for String method")
-            .to_string(ctx)?;
+            .expect("failed to get argument for String method");
+
+        if Self::is_regex_string(arg) {
+            ctx.throw_type_error(
+                "First argument to String.prototype.startsWith must not be a regular expression",
+            )?;
+        }
+
+        let search_string = arg.to_string(ctx)?;
 
         let length = primitive_val.chars().count() as i32;
         let search_length = search_string.chars().count() as i32;
@@ -374,11 +380,18 @@ impl String {
         // Then we convert it into a Rust String by wrapping it in from_value
         let primitive_val = this.to_string(ctx)?;
 
-        // TODO: Should throw TypeError if search_string is regular expression
-        let search_string = args
+        let arg = args
             .get(0)
-            .expect("failed to get argument for String method")
-            .to_string(ctx)?;
+            .expect("failed to get argument for String method");
+
+        if Self::is_regex_string(arg) {
+            ctx.throw_type_error(
+                "First argument to String.prototype.endsWith must not be a regular expression",
+            )?;
+        }
+
+        // TODO: Should throw TypeError if search_string is regular expression
+        let search_string = arg.to_string(ctx)?;
 
         let length = primitive_val.chars().count() as i32;
         let search_length = search_string.chars().count() as i32;
@@ -420,11 +433,17 @@ impl String {
         // Then we convert it into a Rust String by wrapping it in from_value
         let primitive_val = this.to_string(ctx)?;
 
-        // TODO: Should throw TypeError if search_string is regular expression
-        let search_string = args
+        let arg = args
             .get(0)
-            .expect("failed to get argument for String method")
-            .to_string(ctx)?;
+            .expect("failed to get argument for String method");
+
+        if Self::is_regex_string(arg) {
+            ctx.throw_type_error(
+                "First argument to String.prototype.includes must not be a regular expression",
+            )?;
+        }
+
+        let search_string = arg.to_string(ctx)?;
 
         let length = primitive_val.chars().count() as i32;
 
@@ -459,6 +478,13 @@ impl String {
                 "undefined".to_string()
             }
             _ => "undefined".to_string(),
+        }
+    }
+
+    fn is_regex_string(value: &Value) -> bool {
+        match value {
+            Value::Object(ref obj) => obj.borrow().is_regexp(),
+            _ => false,
         }
     }
 
